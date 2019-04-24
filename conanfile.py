@@ -97,8 +97,7 @@ class SynAppsConan(ConanFile):
         elif tools.os_info.is_macos:
             arch = "darwin-x86"
 
-        for module in self._list_wanted_modules(
-                '/Users/brambilla/.conan/data/synapps/0.1/devel/epics/build/4ec342c7155e8f6625f44c01898a08bd8fd5d8f3/synApps/support'):
+        for module in self._list_wanted_modules():
             path = os.path.join('synApps/support', module, 'lib', arch)
             if os.path.isdir(path):
                 self.copy("*.a", dst="lib", src=path, keep_path=False)
