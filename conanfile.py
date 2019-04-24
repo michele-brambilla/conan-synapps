@@ -5,7 +5,7 @@ from conans import AutoToolsBuildEnvironment, ConanFile, RunEnvironment, tools
 
 class SynAppsConan(ConanFile):
     name = "synapps"
-    version = "0.1"
+    version = "6.0"
     license = "<Put the package license here>"
     url = "https://epics.anl.gov/bcda/synApps/tar/synApps_6_0.tar.gz"
     description = "<Description of synApps here>"
