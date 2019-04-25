@@ -15,16 +15,21 @@ class SynAppsConan(ConanFile):
     generators = "gcc"
     requires = 'epics/3.16.1-4.6.0-dm6@ess-dmsc/stable', 're2c/0.1@devel/epics'
 
-    no_modules = ["ALIVE", "CAMAC", "CAPUTRECORDER", "DAC128V", "DELAYGEN", "DXP", "DXPSITORO", "DEVIOCSTATS", "IP",
-                  "IPAC", "IP330", "IPUNIDIG", "LOVE", "LUA", "MCA", "MEASCOMP", "MODBUS", "MOTOR", "OPTICS", "QUADEM",
-                  "SOFTGLUE", "SOFTGLUEZYNQ", "STD", "VAC", "VME", "YOKOGAWA_DAS", "XXX", "STREAM", "AREA_DETECTOR",
-                  "ADCORE", "ADSUPPORT", "ADSIMDETECTOR", "ALLEN_BRADLEY"]
+    no_modules = ["ALIVE", "CAMAC", "CAPUTRECORDER", "DAC128V", "DELAYGEN",
+                  "DXP", "DXPSITORO", "IP",
+                  "IPAC", "IP330", "IPUNIDIG", "LOVE", "LUA", "MCA",
+                  "MEASCOMP", "MODBUS", "MOTOR", "OPTICS", "QUADEM",
+                  "SOFTGLUE", "SOFTGLUEZYNQ", "STREAM", "VAC", "VME",
+                  "YOKOGAWA_DAS",
+                  "XXX", "ALLEN_BRADLEY"]
     modules = []
 
     def get_epics_info(self):
-        epics_base = self.deps_cpp_info["epics"].rootpath.replace('/package/', '/build/')
+        epics_base = self.deps_cpp_info["epics"].rootpath.replace('/package/',
+                                                                  '/build/')
 
-        epics_version = [folder for folder in os.listdir(path=epics_base) if folder.startswith('base-')]
+        epics_version = [folder for folder in os.listdir(path=epics_base) if
+                         folder.startswith('base-')]
         if epics_version:
             epics_base += '/' + epics_version[0]
             epics_version = epics_version[0].split('-')[1]
@@ -49,19 +54,23 @@ class SynAppsConan(ConanFile):
         tools.replace_in_file("synApps/support/configure/RELEASE",
                               "SUPPORT=/home/oxygen40/KLANG/Documents/synApps/support",
                               "SUPPORT=" + os.getcwd() + "/synApps/support")
-        tools.replace_in_file("synApps/support/configure/RELEASE", "EPICS_BASE=/APSshare/epics/base-3.15.5",
+        tools.replace_in_file("synApps/support/configure/RELEASE",
+                              "EPICS_BASE=/APSshare/epics/base-3.15.5",
                               "EPICS_BASE=" + epics_base)
 
     def _set_extra_options(self):
-        tools.replace_in_file("synApps/support/configure/CONFIG_SITE", "LINUX_USB_INSTALLED = YES",
+        tools.replace_in_file("synApps/support/configure/CONFIG_SITE",
+                              "LINUX_USB_INSTALLED = YES",
                               "LINUX_USB_INSTALLED = NO")
-        tools.replace_in_file("synApps/support/configure/CONFIG_SITE", "LINUX_NET_INSTALLED = YES",
+        tools.replace_in_file("synApps/support/configure/CONFIG_SITE",
+                              "LINUX_NET_INSTALLED = YES",
                               "LINUX_NET_INSTALLED = NO")
 
     # deselect unnecessary modules
     def _comment_unwanted_modules(self):
         for module in self.no_modules:
-            tools.replace_in_file("synApps/support/configure/RELEASE", module, "# " + module)
+            tools.replace_in_file("synApps/support/configure/RELEASE", module,
+                                  "# " + module)
 
     # create a list with the modules that will be built
     def _list_wanted_modules(self, path='synApps/support'):
