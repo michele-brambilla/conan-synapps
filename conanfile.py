@@ -107,14 +107,34 @@ class SynAppsConan(ConanFile):
             arch = "darwin-x86"
 
         for module in self._list_wanted_modules():
-            path = os.path.join('synApps/support', module, 'lib', arch)
-            if os.path.isdir(path):
-                self.copy("*.a", dst="lib", src=path, keep_path=False)
-                self.copy("*.so", dst="lib", src=path, keep_path=False)
-                self.copy("*.dylib", dst="lib", src=path, keep_path=False)
-            path = os.path.join('synApps/support', module, 'include')
-            if os.path.isdir(path):
-                self.copy("*.h", dst="include", src=path, keep_path=False)
+            if 'areaDetector' not in module:
+                src = os.path.join('synApps/support', module, 'lib', arch)
+                if os.path.isdir(src):
+                    self.output.info('Copy libraries from %r:' % module)
+                    self.copy("*.a", dst="lib", src=src, keep_path=False)
+                    self.copy("*.so", dst="lib", src=src, keep_path=False)
+                    self.copy("*.dylib", dst="lib", src=src, keep_path=False)
+                    inc = os.path.join('synApps/support', module, 'include')
+                    if os.path.isdir(inc):
+                        self.copy("*.h", dst="include", src=inc,
+                                  keep_path=False)
+
+            else:
+                with tools.chdir(os.path.join('synApps/support', module)):
+                    for sub in os.listdir():
+                        src = os.path.join(os.getcwd(), sub, 'lib', arch)
+                        if os.path.isdir(src):
+                            self.output.info('Copy libraries from %r:' % sub)
+                            self.copy("*.a", dst="lib", src=src,
+                                      keep_path=False)
+                            self.copy("*.so", dst="lib", src=src,
+                                      keep_path=False)
+                            self.copy("*.dylib", dst="lib", src=src,
+                                      keep_path=False)
+                            inc = os.path.join(os.getcwd(), sub, 'include')
+                            if os.path.isdir(inc):
+                                self.copy("*.h", dst="include", src=inc,
+                                    keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = self.collect_libs()
