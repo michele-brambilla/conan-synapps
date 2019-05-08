@@ -8,12 +8,15 @@ class SynAppsConan(ConanFile):
     version = "6.0"
     license = "<Put the package license here>"
     url = "https://epics.anl.gov/bcda/synApps/tar/synApps_6_0.tar.gz"
+    nd_driver_std_arrays_url="https://github.com/areaDetector/NDDriverStdArrays.git"
+    pva_driver="https://github.com/areaDetector/pvaDriver.git"
+    adkafkaplugin_url = "git@github.com:ess-dmsc/ad-kafka-interface.git"
     description = "<Description of synApps here>"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     default_options = "shared=False"
     generators = "gcc"
-    requires = 'epics/3.16.1-4.6.0-dm6@ess-dmsc/stable', 're2c/0.1@devel/epics'
+    requires = 'epics/3.16.1-4.6.0@devel/epics', 're2c/1.1@devel/epics'
 
     no_modules = ["ALIVE", "CAMAC", "CAPUTRECORDER", "DAC128V", "DELAYGEN",
                   "DXP", "DXPSITORO", "IP",
@@ -45,8 +48,19 @@ class SynAppsConan(ConanFile):
         return result
 
     def source(self):
-        self.run("curl -o synApp.tgz " + self.url)
-        self.run("tar -xzvf synApp.tgz")
+        tools.get(self.url)
+        tools.Git(folder='ad-kafka-interface').clone(self.adkafkaplugin_url)
+
+        area_detector = [d for d in os.listdir('synApps/support') if
+                         'areaDetector' in d]
+        with tools.chdir(os.path.join('synApps','support',area_detector[0])):
+            tools.Git(folder='NDDriverStdArrays').clone(
+                self.nd_driver_std_arrays_url)
+            tools.Git(folder='pvaDriver').clone(self.pva_driver)
+
+        self.run('cp -r ad-kafka-interface/m-epics-ADPluginKafka {}'.format(
+                  os.path.join('synApps','support',area_detector[0])))
+        tools.rmdir('ad-kafka-interface')
 
     # replace EPICS paths
     def _replace_epics_base(self):
@@ -134,7 +148,7 @@ class SynAppsConan(ConanFile):
                             inc = os.path.join(os.getcwd(), sub, 'include')
                             if os.path.isdir(inc):
                                 self.copy("*.h", dst="include", src=inc,
-                                    keep_path=False)
+                                          keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = self.collect_libs()
